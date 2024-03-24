@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Wildlife Monitoring and Tracking System{% endblock %}</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-vrl43oaKXlb7MTSD3zdOq1fDuhDPR/3o9NZ4VmZ6VRx7OwwpI1yFzQK51sRaIghu6W6BlSXLRBcUs9mvSXPV5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Custom styling for navigation bar */
+        .navbar {
+            background: linear-gradient(90deg, #2980b9, #3498db); /* Gradient background */
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
+            padding: 10px 0; /* Padding */
+        }
+        .navbar-brand {
+            color: #ffffff !important; /* White text */
+            font-weight: bold;
+            font-size: 24px; /* Larger font size */
+        }
+        .navbar-toggler-icon {
+            border-color: #ffffff; /* White color for toggler icon */
+        }
+        .navbar-nav .nav-link {
+            color: #ffffff !important; /* White text */
+            transition: color 0.3s ease; /* Smooth color transition */
+        }
+        .navbar-nav .nav-link:hover {
+            color: #f39c12 !important; /* Yellow on hover */
+        }
+        .dropdown-menu {
+            background: linear-gradient(90deg, #2c3e50, #34495e); /* Gradient background for dropdown */
+            border: none; /* Remove border */
+        }
+        .dropdown-item {
+            color: #ffffff !important; /* White text in dropdown */
+            transition: background-color 0.3s ease; /* Smooth background color transition */
+        }
+        .dropdown-item:hover {
+            background-color: #f39c12 !important; /* Yellow background on hover */
+        }
+        .notification-icon {
+            position: relative;
+            color: #ffffff !important; /* White color */
+        }
+        .notification-text {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c; /* Red background */
+            color: #ffffff; /* White text */
+            border-radius: 50%; /* Circle shape */
+            padding: 5px 8px; /* Padding */
+            font-size: 12px; /* Font size */
+            font-weight: bold;
+            display: none; /* Hide by default */
+            transition: opacity 0.3s ease; /* Smooth transition */
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
+        }
+        .notification-icon:hover .notification-text {
+            display: inline-block; /* Show on hover */
+        }
+        /* CSS */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .animated-text .letter {
+            display: inline-block; /* Ensure each character is treated as a separate element */
+            animation: bounce 0.5s ease infinite alternate; /* Bounce animation */
+        }
+
+        .animated-text .letter:nth-child(odd) {
+            color: #3498d; /* Color of odd letters */
+        }
+
+        .animated-text .letter:nth-child(even) {
+            color: #e74c3c; /* Color of even letters */
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand animated-text" href="#">
+            <span class="letter">W</span>
+            <span class="letter">.</span>
+            <span class="letter">M</span>
+            <span class="letter">.</span>
+            <span class="letter">T</span>
+            <span class="letter">.</span>
+            <span class="letter">S</span>
+            <span class="letter">.</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">About Us</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="wildlifeDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Wildlife
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="wildlifeDropdown">
+                        <a class="dropdown-item" href="{{ url_for('wildlife_species') }}">Wildlife Species</a>
+                        <a class="dropdown-item" href="{{ url_for('wildlife_sightings') }}">Wildlife Sightings</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('conservation_areas') }}">Conservation Areas</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="mapDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Map
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="mapDropdown">
+                        <a class="dropdown-item" href="{{ url_for('real_time_map') }}">Real-Time Map</a>
+                        <a class="dropdown-item" href="{{ url_for('historical_data') }}">Historical Data</a>
+                        </div>
+                        </li>
+                        <li class="nav-item notification-icon">
+                        <a class="nav-link" href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i><span class="notification-text">3</span></a>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Admin
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                        </div>
+                        </li>
+                        <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}">Contact Us</a>
+                        </li>
+                        </ul>
+                        </div>
+                        </nav>
+                   <!-- Main content -->
+<div class="container-fluid">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- Font Awesome JS -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<!-- Custom JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-WD3XQ2bAHsd7zv/ukB0GjyV8g7/BlXHqOZZsSLgTz08UWdW2eq8WkJfFb8vtmYhxmH9VXy8HHI3iYEPvAdFCjw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

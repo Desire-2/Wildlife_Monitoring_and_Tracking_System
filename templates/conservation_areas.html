@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Nearby Conservation Areas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Nearby Conservation Areas</h1>
+
+    <!-- Filter options -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <form action="{{ url_for('conservation_areas') }}" method="get">
+                <div class="form-group">
+                    <label for="distance">Distance (km)</label>
+                    <input type="number" class="form-control" id="distance" name="distance" placeholder="Enter distance">
+                </div>
+                <!-- Add more filter options as needed -->
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Conservation areas list -->
+    <div class="row">
+        {% for area in conservation_areas %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ area.photo_url }}" class="card-img-top" alt="Conservation Area Image">
+                <div class="card-body">
+                    <h5 class="card-title">{{ area.name }}</h5>
+                    <p class="card-text">Address: {{ area.address }}</p>
+                    <p class="card-text">Rating: {{ area.rating }}</p>
+                    <p class="card-text">Opening Hours:</p>
+                    <ul class="list-unstyled">
+                        {% for hour in area.opening_hours %}
+                        <li>{{ hour }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <!-- Pagination controls -->
+        </ul>
+    </nav>
+</div>
+{% endblock %}

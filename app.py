@@ -11,6 +11,7 @@ import secrets
 import time
 from flask_migrate import Migrate
 from sqlalchemy import or_
+
 # Initialize Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3398c019976ffdefa09991e7255d60aa'
@@ -142,11 +143,12 @@ def save_profile_image(form_profile_image):
 
     form_profile_image.save(profile_image_path)
     return profile_image_fn
+
 class GPSData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default =datetime.utcnow)
     animal_id = db.Column(db.Integer)
 
     def __repr__(self):
@@ -284,7 +286,129 @@ def index():
         ).all()
     else:
         sightings = WildlifeSighting.query.all()
-    return render_template('index.html', sightings=sightings,  sighting_id = 123)
+    return render_template('index.html', sightings=sightings)
+
+# Route for the about us page
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+# Route for the wildlife page
+@app.route('/wildlife')
+def wildlife():
+    return render_template('wildlife.html')
+
+# Route for the wildlife species page
+# Route for displaying nearby wildlife species
+@app.route('/wildlife/species')
+def wildlife_species():
+    # Check if latitude and longitude are provided in the query parameters
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+
+    # Check if latitude and longitude are provided
+    if not latitude or not longitude:
+        # Render the template without species data
+        return render_template('wildlife_species.html', error='Latitude and longitude are required parameters.')
+
+    try:
+        # Call the IUCN Red List API to get nearby species
+        url = f'https://apiv3.iucnredlist.org/api/v3/nearest_species/latitude/{latitude}/longitude/{longitude}'
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Parse the JSON response
+        data = response.json()
+        # Extract relevant information (e.g., species name, threat status)
+        nearby_species = [{'scientific_name': species['scientific_name'], 'threat_status': species['category']} for species in data['result']]
+
+        # Render the template with species data
+        return render_template('wildlife_species.html', nearby_species=nearby_species)
+
+    except requests.RequestException as e:
+        # Render the template with an error message
+        return render_template('wildlife_species.html', error='Failed to retrieve nearby species. Error: ' + str(e))
+
+# Route for the wildlife sightings page
+@app.route('/wildlife/sightings')
+def wildlife_sightings():
+    return render_template('wildlife_sightings.html')
+
+# Route for displaying nearby conservation areas
+@app.route('/conservation_areas')
+def conservation_areas():
+    try:
+        # Get user's location from request
+        latitude = request.args.get('latitude')
+        longitude = request.args.get('longitude')
+
+        # Make a nearby search request to Google Places API
+        places_result = gmaps.places_nearby(location=(latitude, longitude), radius=10000, type='park')
+
+        # Extract relevant information from the API response
+        conservation_areas = []
+        for place in places_result['results']:
+            name = place['name']
+            location = place['geometry']['location']
+            address = place.get('vicinity', 'Address not available')
+            rating = place.get('rating', 'Rating not available')
+            opening_hours = place.get('opening_hours', {}).get('weekday_text', ['Opening hours not available'])
+            photos = place.get('photos', [])
+            photo_url = photos[0]['photo_reference'] if photos else None
+
+            conservation_areas.append({
+                'name': name,
+                'latitude': location['lat'],
+                'longitude': location['lng'],
+                'address': address,
+                'rating': rating,
+                'opening_hours': opening_hours,
+                'photo_url': photo_url
+            })
+
+        # Pagination
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_areas = conservation_areas[start_idx:end_idx]
+
+        # Render the template with the list of conservation areas
+        return render_template('conservation_areas.html', conservation_areas=paginated_areas)
+
+    except Exception as e:
+        # Handle any errors that occur during the process
+        return render_template('error.html', error_message=str(e))
+
+# Route for the map page
+@app.route('/map')
+def map():
+    return render_template('map.html')
+
+# Route for the real-time map page
+@app.route('/map/real-time')
+def real_time_map():
+    return render_template('real_time_map.html')
+
+# Route for the historical data page
+@app.route('/map/historical-data')
+def historical_data():
+    return render_template('historical_data.html')
+
+# Route for the notifications page
+@app.route('/notifications')
+def notifications():
+    return render_template('notifications.html')
+
+# Route for the admin dashboard page
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+# Route for the contact us page
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
