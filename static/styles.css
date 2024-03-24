@@ -1,0 +1,98 @@
+/* static/styles.css */
+body {
+    background: url('{{ url_for("static", filename="background-video.mp4") }}') no-repeat center center fixed;
+    background-size: cover;
+    animation: fadeInAnimation ease 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.jumbotron {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 60px;
+    font-weight: bold;
+}
+
+.card {
+    margin-top: 20px;
+}
+
+.card-img-top {
+    max-height: 200px;
+    object-fit: cover;
+}
+
+#map {
+    margin-top: 20px;
+    border-radius: 60px;
+}
+/* Custom CSS for Wildlife Sightings Section */
+.card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #333;
+}
+
+.images img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.videos video {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.btn {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+

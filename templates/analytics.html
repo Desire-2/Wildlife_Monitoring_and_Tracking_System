@@ -1,0 +1,47 @@
+<!-- templates/analytics.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analytics</title>
+    <!-- Include data visualization library -->
+    <!-- Plotly example -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Data Analytics</h1>
+    <div id="chart"></div>
+    <script>
+        var species = {{ species | tojson }};
+        var locations = {{ locations | tojson }};
+        var dates = {{ dates | tojson }};
+        var trace1 = {
+            x: dates,
+            y: species,
+            mode: 'lines+markers',
+            type: 'scatter',
+            name: 'Species'
+        };
+        var trace2 = {
+            x: dates,
+            y: locations,
+            mode: 'lines+markers',
+            type: 'scatter',
+            name: 'Locations'
+        };
+        var data = [trace1, trace2];
+        var layout = {
+            title: 'Wildlife Sighting Trends',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Count'
+            }
+        };
+        Plotly.newPlot('chart', data, layout);
+    </script>
+</body>
+</html>
+

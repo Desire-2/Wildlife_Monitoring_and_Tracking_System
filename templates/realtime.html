@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildlife Tracking</title>
+    <!-- Leaflet CSS for map styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet.css') }}">
+    <!-- Custom CSS for additional styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='realtime.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Real-Time Wildlife Tracking</h1>
+            <p>Follow the movement of tagged wildlife in real-time!</p>
+        </div>
+    </header>
+
+    <div id="map"></div>
+
+    <div id="sidebar">
+        <div class="container">
+            <h2>Wildlife Details</h2>
+            <ul id="wildlife-list">
+                <!-- Wildlife details will be populated dynamically -->
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2024 Wildlife Tracking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS for map functionality -->
+    <script src="{{ url_for('static', filename='leaflet.js') }}"></script>
+    <!-- Socket.IO for real-time communication -->
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <!-- Custom JavaScript for map functionality -->
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
+<!-- The real-time.html template is similar to the sightings_map.html template, but it includes additional JavaScript for real-time communication with the server. -->
