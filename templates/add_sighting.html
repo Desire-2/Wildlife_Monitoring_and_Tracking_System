@@ -1,44 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Wildlife Sighting</title>
-    <!-- Include Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Add Wildlife Sighting</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                <label for="species">Species</label>
-                {{ form.species(class="form-control", id="species") }}
-            </div>
-            <div class="form-group">
-                <label for="location">Location</label>
-                {{ form.location(class="form-control", id="location") }}
-            </div>
-            <div class="form-group">
-                <label for="date">Date</label>
-                {{ form.date(class="form-control", id="date") }}
-            </div>
-            <div class="form-group">
-                <label for="images">Upload Images</label>
-                {{ form.images(class="form-control-file", id="images", multiple="multiple") }}
-            </div>
-            <div class="form-group">
-                <label for="videos">Upload Videos</label>
-                {{ form.videos(class="form-control-file", id="videos", multiple="multiple") }}
-            </div>
-            <button type="submit" class="btn btn-primary">Add Sighting</button>
-        </form>
-    </div>
+{% extends "base.html" %}
+{% block title %}Add Sighting{% endblock %}
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Add Sighting</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Sighting Form -->
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label for="species">Species</label>
+                    <input type="text" class="form-control" id="species" name="species" placeholder="Enter species">
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="Enter location">
+                </div>
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" class="form-control" id="date" name="date">
+                </div>
+                <div class="form-group">
+                    <label for="observation_notes">Observation Notes</label>
+                    <textarea class="form-control" id="observation_notes" name="observation_notes" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="images">Upload Images</label>
+                    <input type="file" class="form-control-file" id="images" name="images" multiple>
+                </div>
+                <div class="form-group">
+                    <label for="videos">Upload Videos</label>
+                    <input type="file" class="form-control-file" id="videos" name="videos" multiple>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Add Sighting</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

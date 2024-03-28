@@ -4,21 +4,36 @@ from datetime import datetime
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from forms import WildlifeSightingForm, LoginForm, RegistrationForm, UserProfileForm
+from forms import SightingForm, LoginForm, RegistrationForm, UserProfileForm
 from werkzeug.utils import secure_filename
 import os
+from io import BytesIO
 import secrets
 import time
 from flask_migrate import Migrate
 from sqlalchemy import or_
+from flask_login import login_user, current_user, login_required
+from flask_mail import Message
+from flask_mail import Mail
+from sqlalchemy.exc import IntegrityError
+
 
 # Initialize Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '3398c019976ffdefa09991e7255d60aa'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wildlife.db'
 
+app.config['MAIL_SERVER'] = 'smtp.mail.yahoo.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'bikorimanadesire@yahoo.com'
+app.config['MAIL_PASSWORD'] = 'Raisa@#1'
+
+mail = Mail(app)
+
+from models import User, WildlifeSighting, db, Location, Species, Observation, Image, Video
 # Initialize SQLAlchemy for database operations
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 socketio = SocketIO(app)
 
@@ -30,35 +45,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Helper function to check if a file has an allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# Define User model
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-
-# Define WildlifeSighting model
-class WildlifeSighting(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    species = db.Column(db.String(100), nullable=False)
-    location = db.Column(db.String(100), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('sightings', lazy=True))
-    images = db.relationship('Image', backref='sighting', lazy=True)
-    videos = db.relationship('Video', backref='sighting', lazy=True)
-
-# Define Image model
-class Image(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(100), nullable=False)
-    sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
-
-# Define Video model
-class Video(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(100), nullable=False)
-    sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
 
 # Initialize Flask-Login for user authentication
 login_manager = LoginManager()
@@ -75,27 +61,78 @@ def load_user(user_id):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user and user.password == form.password.data:
+        identifier = form.identifier.data
+        password = form.password.data
+        
+        # Check if the identifier is an email
+        user = User.query.filter_by(email=identifier).first()
+        
+        # If not found by email, check by username
+        if not user:
+            user = User.query.filter_by(username=identifier).first()
+        
+        if user and user.check_password(password):
+            # Log the user in using Flask-Login's login_user function
             login_user(user)
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('index'))
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
         else:
-            flash('Login unsuccessful. Please check username and password.', 'danger')
-    return render_template('login.html', form=form)
-
+            flash('Invalid email/username or password.', 'danger')
+    
+    return render_template('login.html', title='Login', form=form)
 # Register route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        new_user = User(username=form.username.data, password=form.password.data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created successfully! You can now log in.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html', form=form)
+        try:
+            # Create a new user instance
+            new_user = User(
+                username=form.username.data,
+                email=form.email.data,
+                password=form.password.data,
+                first_name=form.first_name.data,
+                last_name=form.last_name.data
+            )
 
+            # Add user to the database
+            db.session.add(new_user)
+            db.session.commit()
+
+            # Send email verification message
+            send_verification_email(new_user)
+
+            flash('Account created successfully. Please check your email to verify your account.', 'success')
+            return redirect(url_for('login'))
+        except IntegrityError:
+            # Handle IntegrityError (duplicate email)
+            db.session.rollback()
+            flash('Email address already exists.', 'danger')
+            return redirect(url_for('register'))
+    return render_template('register.html', title='Register', form=form)
+
+def send_verification_email(user):
+    token = user.verification_token
+    msg = Message('Verify Your Email', recipients=[user.email])
+    verification_url = url_for('verify_email', token=token, _external=True)
+    msg.body = f'Click the following link to verify your email: {verification_url}'
+    mail.send(msg)
+
+@app.route('/verify_email/<token>')
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if user:
+        if user.is_verified:
+            flash('Your email has already been verified.', 'info')
+        else:
+            if user.verify_email_token(token):
+                flash('Your email has been verified successfully.', 'success')
+            else:
+                flash('Invalid or expired verification link.', 'danger')
+        return redirect(url_for('login'))
+    else:
+        flash('Invalid verification link.', 'danger')
+        return redirect(url_for('login'))
 # Logout route
 @app.route('/logout')
 @login_required
@@ -143,6 +180,13 @@ def save_profile_image(form_profile_image):
 
     form_profile_image.save(profile_image_path)
     return profile_image_fn
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Retrieve all wildlife sightings associated with the current user
+    user_sightings = WildlifeSighting.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard.html', title='Dashboard', sightings=user_sightings)
+
 
 class GPSData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -189,82 +233,71 @@ def emit_data():
         time.sleep(5)
 
 # Route for adding a wildlife sighting
+
 @app.route('/add_sighting', methods=['GET', 'POST'])
 @login_required
 def add_sighting():
-    form = WildlifeSightingForm()
+    form = SightingForm()
+
     if form.validate_on_submit():
-        species = form.species.data
-        location = form.location.data
+        species_name = form.species.data
+        location_name = form.location.data
         date = form.date.data
+        observation_notes = form.observation_notes.data
+
+        # Check if species already exists in the database
+        species = Species.query.filter_by(name=species_name).first()
+        if not species:
+            # If species does not exist, create a new one
+            species = Species(name=species_name)
+            db.session.add(species)
+
+        # Check if location already exists in the database
+        location = Location.query.filter_by(name=location_name).first()
+        if not location:
+            # If location does not exist, create a new one
+            location = Location(name=location_name)
+            db.session.add(location)
 
         # Create a new WildlifeSighting object
-        new_sighting = WildlifeSighting(species=species, location=location, date=date, user_id=current_user.id)
+        new_sighting = WildlifeSighting(
+            species=species,
+            location=location,
+            date=date,
+            user=current_user,
+        )
+
+        # Create a new Observation object
+        observation = Observation(date=date, notes=observation_notes)
+
+        # Add the observation to the sighting
+        new_sighting.observation = observation
+
+        # Handle images
+        if form.image.data:
+            image_file = form.image.data
+            image_data = image_file.read()
+            filename = secure_filename(image_file.filename)
+            image = Image(filename=filename, data=image_data, species=species)
+            image.sighting = new_sighting
+            db.session.add(image)
+
+        # Handle videos
+        if form.videos.data:
+            filename = secure_filename(form.videos.data.filename)
+            video_data = form.videos.data.read()  # Read binary data of the video file
+            video = Video(filename=filename, data=video_data, species_id=species.id)  # Pass species_id instead of species
+            video.sighting = new_sighting
+            db.session.add(video)
+
+        # Commit the new sighting and associated data to the database
         db.session.add(new_sighting)
         db.session.commit()
 
-        # Handle image files
-        for file in request.files.getlist('images'):
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                
-                # Create an Image object and associate it with the new sighting
-                new_image = Image(filename=filename, sighting_id=new_sighting.id)
-                db.session.add(new_image)
-        
-        # Handle video files
-        for file in request.files.getlist('videos'):
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                
-                # Create a Video object and associate it with the new sighting
-                new_video = Video(filename=filename, sighting_id=new_sighting.id)
-                db.session.add(new_video)
+        flash('Sighting added successfully!', 'success')
+        return redirect(url_for('dashboard'))
 
-        db.session.commit()
-        flash('New wildlife sighting added!', 'success')
-        return redirect(url_for('index'))
-    return render_template('add_sighting.html', form=form)
-
-# Route for updating a wildlife sighting
-@app.route('/update_sighting/<int:sighting_id>', methods=['GET', 'POST'])
-@login_required
-def update_sighting(sighting_id):
-    sighting = WildlifeSighting.query.get_or_404(sighting_id)
-    form = WildlifeSightingForm(obj=sighting)
-    if form.validate_on_submit():
-        form.populate_obj(sighting)
-
-        # Handle image files
-        for file in request.files.getlist('images'):
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                
-                # Create an Image object and associate it with the updated sighting
-                new_image = Image(filename=filename, sighting_id=sighting.id)
-                db.session.add(new_image)
-        
-        # Handle video files
-        for file in request.files.getlist('videos'):
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                
-                # Create a Video object and associate it with the updated sighting
-                new_video = Video(filename=filename, sighting_id=sighting.id)
-                db.session.add(new_video)
-
-        db.session.commit()
-        flash('Wildlife sighting updated!', 'success')
-        return redirect(url_for('index'))
-    return render_template('update_sighting.html', form=form)
+    return render_template('add_sighting.html', title='Add Sighting', form=form)
 
 # Route for deleting a wildlife sighting
 @app.route('/delete_sighting/<int:sighting_id>', methods=['POST'])
