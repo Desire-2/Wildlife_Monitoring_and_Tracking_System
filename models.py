@@ -111,6 +111,8 @@ class Species(db.Model):
     description = db.Column(db.Text)
 
     # Define relationships
+    images = db.relationship('Image', back_populates='species')
+    videos = db.relationship('Video', back_populates='species')
     observations = db.relationship('WildlifeSighting', backref='observed_species', foreign_keys='WildlifeSighting.species_id')
     habitat_id = db.Column(db.Integer, db.ForeignKey('habitats.id'))
 
@@ -142,14 +144,15 @@ class Image(db.Model):
     path = db.Column(db.String(255), nullable=False)
     data = db.Column(LargeBinary, nullable=False)
     species_id = db.Column(db.Integer, db.ForeignKey('species.id'), nullable=False)
-
+    species = db.relationship('Species', back_populates='images')
 # Video model
 class Video(db.Model):
     __tablename__ = 'videos'
 
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
-    path = db.Column(db.String(255), nullable=False)
+    path = db.Column(db.String(255), nullable=True)
     data = db.Column(LargeBinary, nullable=False)
     species_id = db.Column(db.Integer, db.ForeignKey('species.id'), nullable=False)
+    species = db.relationship('Species', back_populates='videos')
     

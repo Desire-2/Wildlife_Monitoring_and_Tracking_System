@@ -292,8 +292,7 @@ def add_sighting():
                     # Create an Image object and associate it with the sighting
                     with open(image_path, 'rb') as f:
                         image_data = f.read()
-                    image = Image(filename=filename, path=image_path, data=image_data, species_id=species.id)  # Set the species_id attribute
-                    image.sighting = new_sighting
+                    image = Image(filename=filename, path=image_path, data=image_data, species_id=species.id)
                     db.session.add(image)
                 else:
                     flash('Invalid file type for image. Allowed types are: jpg, jpeg, png, gif.', 'danger')
@@ -308,9 +307,12 @@ def add_sighting():
                     video_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     video_file.save(video_path)
                     
+                    # Read the video data
+                    with open(video_path, 'rb') as f:
+                        video_data = f.read()
+                    
                     # Create a Video object and associate it with the sighting
-                    video = Video(filename=filename)
-                    video.sighting = new_sighting
+                    video = Video(filename=filename, path=video_path, data=video_data, species_id=species.id)
                     db.session.add(video)
                 else:
                     flash('Invalid file type for video. Allowed types are: mp4.', 'danger')
@@ -323,7 +325,6 @@ def add_sighting():
         return redirect(url_for('dashboard'))
 
     return render_template('add_sighting.html', title='Add Sighting', form=form)
-
 # Route for deleting a wildlife sighting
 @app.route('/delete_sighting/<int:sighting_id>', methods=['POST'])
 @login_required
@@ -335,17 +336,7 @@ def delete_sighting(sighting_id):
     return redirect(url_for('index'))
 
 # Route for the index page with sightings and search functionality
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        search_term = request.form.get('search_term')
-        sightings = WildlifeSighting.query.filter(
-            or_(WildlifeSighting.species.ilike(f"%{search_term}%"), WildlifeSighting.location.ilike(f"%{search_term}%"))
-        ).all()
-    else:
-        sightings = WildlifeSighting.query.all()
-    return render_template('index.html', sightings=sightings)
-# Define the route for editing a wildlife sighting
+
 @app.route('/edit_sighting/<int:sighting_id>', methods=['GET', 'POST'])
 def edit_sighting(sighting_id):
     sighting = WildlifeSighting.query.get_or_404(sighting_id)
