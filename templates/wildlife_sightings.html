@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Wildlife Sightings{% endblock %}
+{% block content %}
+    <style>
+        /* Embedded CSS styles */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9; /* Added background color */
+            border-radius: 10px; /* Added border radius */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added box shadow */
+        }
+
+        .heading {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #333; /* Added color */
+        }
+
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            padding: 10px;
+            width: 60%;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .sightings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .sightings-table th, .sightings-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .image-cell, .video-cell {
+            text-align: center;
+            vertical-align: middle; /* Added vertical alignment */
+        }
+
+        .sighting-image {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px; /* Added border radius */
+        }
+
+        .sighting-video {
+            width: 320px;
+            height: 240px;
+        }
+
+        .no-image, .no-video {
+            color: #ff0000;
+            font-style: italic; /* Added italic font style */
+        }
+
+        .more-images, .more-videos {
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px; /* Reduced font size */
+        }
+
+        .total-sightings, .no-sightings {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+
+    <div class="container">
+        <h1 class="heading">Wildlife Sightings</h1>
+        <div class="search-container">
+            <form action="/search" method="GET">
+                <input type="text" name="query" placeholder="Search by species..." class="search-input">
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+        </div>
+        <div class="table-container">
+            <table class="sightings-table">
+                <thead>
+                    <tr>
+                        <th>Species</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Observation</th>
+                        <th>Image</th>
+                        <th>Video</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sighting in sightings %}
+                    <tr>
+                        <td>{{ sighting.species.name }}</td>
+                        <td>{{ sighting.location.name }}</td>
+                        <td>{{ sighting.date }}</td>
+                        <td>{{ sighting.user.username }}</td>
+                        <td>{{ sighting.observation.notes }}</td>
+                        <td class="image-cell">
+                            {% if sighting.images %}
+                                <img src="{{ url_for('static', filename='images/' + sighting.images[0].filename) }}" alt="{{ sighting.species.name }}" class="sighting-image">
+                                {% if sighting.images|length > 1 %}
+                                    <p class="more-images">+ {{ sighting.images|length - 1 }} more</p>
+                                {% endif %}
+                            {% else %}
+                                <p class="no-image">No image available</p>
+                            {% endif %}
+                        </td>
+                        <td class="video-cell">
+                            {% if sighting.videos %}
+                                <video width="320" height="240" controls class="sighting-video">
+                                    <source src="{{ url_for('static', filename='videos/' + sighting.videos[0].filename) }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                {% if sighting.videos|length > 1 %}
+                                    <p class="more-videos">+ {{ sighting.videos|length - 1 }} more</p>
+                                {% endif %}
+                            {% else %}
+                                <p class="no-video">No video available</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if sightings %}
+            <div class="total-sightings">
+                <p>Total sightings: {{ sightings|length }}</p>
+            </div>
+        {% else %}
+            <div class="no-sightings">
+                <p>No sightings found</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

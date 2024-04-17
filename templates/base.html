@@ -12,8 +12,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
-
-    dashboard
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-vrl43oaKXlb7MTSD3zdOq1fDuhDPR/3o9NZ4VmZ6VRx7OwwpI1yFzQK51sRaIghu6W6BlSXLRBcUs9mvSXPV5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Custom styling for navigation bar */
@@ -25,7 +23,7 @@
         .navbar-brand {
             color: #ffffff !important; /* White text */
             font-weight: bold;
-            font-size: 24px; /* Larger font size */
+            font-size: 30px; /* Larger font size */
         }
         .navbar-toggler-icon {
             border-color: #ffffff; /* White color for toggler icon */
@@ -54,15 +52,15 @@
         }
         .notification-text {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #e74c3c; /* Red background */
-            color: #ffffff; /* White text */
+            top: -14px;
+            right: 8px;
+            background-color: #e74c3b; /* Red background */
+            color: #fffffb; /* White text */
             border-radius: 50%; /* Circle shape */
             padding: 5px 8px; /* Padding */
             font-size: 12px; /* Font size */
             font-weight: bold;
-            display: none; /* Hide by default */
+            display: inline-block; /* Hide by default */
             transition: opacity 0.3s ease; /* Smooth transition */
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
         }
@@ -137,8 +135,9 @@
                         <a class="dropdown-item" href="{{ url_for('historical_data') }}">Historical Data</a>
                         </div>
                         </li>
-                        <li class="nav-item notification-icon">
-                        <a class="nav-link" href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i><span class="notification-text">3</span></a>
+                       
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login / Signiup</a>
                         </li>
                         <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
@@ -153,6 +152,9 @@
                         </li>
                         <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('contact') }}">Contact Us</a>
+                        </li>
+                         <li class="nav-item notification-icon">
+                        <a class="nav-link" href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i><span class="notification-text">Notif</span></a>
                         </li>
                         </ul>
                         </div>

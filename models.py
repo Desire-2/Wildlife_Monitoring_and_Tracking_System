@@ -85,11 +85,14 @@ class WildlifeSighting(db.Model):
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    observation_id = db.Column(db.Integer, db.ForeignKey('observations.id'))  # Add this line
 
     species = db.relationship('Species', backref=db.backref('sightings', lazy=True))
     location = db.relationship('Location', backref=db.backref('sightings', lazy=True))
     user = db.relationship('User', back_populates='wildlife_sighting')
 
+    # Define the relationship with Observation model
+    observation = db.relationship('Observation', uselist=False, backref='sighting')
     
 # Location model
 class Location(db.Model):
@@ -109,6 +112,10 @@ class Species(db.Model):
 
     # Define relationships
     observations = db.relationship('WildlifeSighting', backref='observed_species', foreign_keys='WildlifeSighting.species_id')
+    habitat_id = db.Column(db.Integer, db.ForeignKey('habitats.id'))
+
+    # Define relationship with Habitat model
+    habitat = db.relationship('Habitat', backref=db.backref('species', lazy=True))
 
 # Habitat model
 class Habitat(db.Model):

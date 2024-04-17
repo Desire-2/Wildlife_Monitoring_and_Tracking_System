@@ -44,8 +44,8 @@
                                     </ul>
                                 </div>
                             {% endif %}
-                            <a href="{{ url_for('edit_sighting', id=sighting.id) }}" class="btn btn-primary btn-sm btn-edit">Edit</a>
-                            <a href="{{ url_for('delete_sighting', id=sighting.id) }}" class="btn btn-danger btn-sm btn-delete">Delete</a>
+                            <a href="{{ url_for('edit_sighting', sighting_id=sighting.id) }}" class="btn btn-primary btn-sm btn-edit">Edit</a>
+                            <a href="{{ url_for('delete_sighting', sighting_id=sighting.id) }}" class="btn btn-danger btn-sm btn-delete">Delete</a>
                         </li>
                     {% endfor %}
                 </ul>
