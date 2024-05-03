@@ -10,10 +10,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-vrl43oaKXlb7MTSD3zdOq1fDuhDPR/3o9NZ4VmZ6VRx7OwwpI1yFzQK51sRaIghu6W6BlSXLRBcUs9mvSXPV5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Custom styling for navigation bar */
-        .navbar {
+       .navbar {
             background: linear-gradient(90deg, #2980b9, #3498db); /* Gradient background */
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
             padding: 10px 0; /* Padding */
@@ -21,7 +23,7 @@
         .navbar-brand {
             color: #ffffff !important; /* White text */
             font-weight: bold;
-            font-size: 24px; /* Larger font size */
+            font-size: 30px; /* Larger font size */
         }
         .navbar-toggler-icon {
             border-color: #ffffff; /* White color for toggler icon */
@@ -29,6 +31,9 @@
         .navbar-nav .nav-link {
             color: #ffffff !important; /* White text */
             transition: color 0.3s ease; /* Smooth color transition */
+            font-size: 18px; /* Increase font size */
+            font-weight: bold; /* Make the font bold */
+            
         }
         .navbar-nav .nav-link:hover {
             color: #f39c12 !important; /* Yellow on hover */
@@ -37,6 +42,12 @@
             background: linear-gradient(90deg, #2c3e50, #34495e); /* Gradient background for dropdown */
             border: none; /* Remove border */
         }
+        .dropdown-menu .dropdown-item {
+        color: #ffffff !important; /* White text in dropdown */
+        transition: background-color 0.3s ease; /* Smooth background color transition */
+        font-size: 16px; /* Increase font size */
+        font-weight: bold; /* Make the font bold */
+        }
         .dropdown-item {
             color: #ffffff !important; /* White text in dropdown */
             transition: background-color 0.3s ease; /* Smooth background color transition */
@@ -44,21 +55,33 @@
         .dropdown-item:hover {
             background-color: #f39c12 !important; /* Yellow background on hover */
         }
+        
+        .navbar-nav .nav-link.login-signup {
+        color: #FF5733 !important; /* Coral color for Login / Signup */
+        }
+
+        .navbar-nav .nav-link.profile {
+            color: #FFC300 !important; /* Sunflower yellow color for Profile */
+        }
+
+        .navbar-nav .nav-link.admin {
+            color: #7D3C98 !important; /* Royal purple color for Admin */
+        }
         .notification-icon {
             position: relative;
             color: #ffffff !important; /* White color */
         }
         .notification-text {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #e74c3c; /* Red background */
-            color: #ffffff; /* White text */
+            top: -14px;
+            right: 8px;
+            background-color: #e74c3b; /* Red background */
+            color: #fffffb; /* White text */
             border-radius: 50%; /* Circle shape */
             padding: 5px 8px; /* Padding */
             font-size: 12px; /* Font size */
             font-weight: bold;
-            display: none; /* Hide by default */
+            display: inline-block; /* Hide by default */
             transition: opacity 0.3s ease; /* Smooth transition */
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
         }
@@ -133,22 +156,30 @@
                         <a class="dropdown-item" href="{{ url_for('historical_data') }}">Historical Data</a>
                         </div>
                         </li>
-                        <li class="nav-item notification-icon">
-                        <a class="nav-link" href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i><span class="notification-text">3</span></a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Admin
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="adminDropdown">
-                        <a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
-                        </div>
-                        </li>
                         <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('contact') }}">Contact Us</a>
+                        </li>
+                       
+                        <li class="nav-item">
+                        <a class="nav-link login-signup" href="{{ url_for('login') }}">Login / Signiup</a>
+                        </li>
+                        {% if user_signed_in %}
+                    <li class="nav-item">
+                        <a class="nav-link profile" href="{{ url_for('profile') }}">Profile</a>
+                    </li>
+                {% endif %}
+                {% if admin_signed_in %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle admin" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Admin
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                        </div>
+                    </li>
+                {% endif %}
+                         <li class="nav-item notification-icon">
+                        <a class="nav-link" href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i><span class="notification-text">Notif</span></a>
                         </li>
                         </ul>
                         </div>
@@ -159,6 +190,44 @@
     {% endblock %}
 </div>
 
+ <footer class="footer bg-dark text-white">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <p>123 Main Street, City, Country</p>
+                    <p>Phone: +1 (123) 456-7890</p>
+                    <p>Email: info@example.com</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <!-- Add your social media icons here -->
+                    <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Wildlife Species</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+             <div class="chat-whatsapp">
+        <a href="https://api.whatsapp.com/send?phone=123456789" target="_blank" class="btn btn-primary">
+            <i class="fab fa-whatsapp"></i> Chat with Us on WhatsApp
+        </a>
+    </div>
+
+        </div>
+        <div class="container text-center">
+            <p>&copy; 2024 Wildlife Monitoring and Tracking System. All rights reserved.</p>
+        </div>
+    </footer>
+    
 <!-- Include Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>

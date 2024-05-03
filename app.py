@@ -1,4 +1,5 @@
 # Import necessary modules
+import requests  # Add this import statement
 from flask import Flask, render_template, redirect, url_for, flash, request
 from datetime import datetime
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -11,6 +12,7 @@ import secrets
 import time
 from flask_migrate import Migrate
 from sqlalchemy import or_
+from flask_mail import Mail, Message
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -21,15 +23,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wildlife.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 socketio = SocketIO(app)
+mail = Mail(app)
 
 # Set up the directory where images and videos will be stored
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Helper function to check if a file has an allowed extension
+# Function to check if a file has an allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+from models import User, UserProfile
+from models import GPSData
+import requests
+import gmaps
+
 
 # Define User model
 class User(UserMixin, db.Model):
@@ -330,10 +339,13 @@ def wildlife_species():
         return render_template('wildlife_species.html', error='Failed to retrieve nearby species. Error: ' + str(e))
 
 # Route for the wildlife sightings page
-@app.route('/wildlife/sightings')
+@app.route('/wildlife_sightings')
 def wildlife_sightings():
-    return render_template('wildlife_sightings.html')
+    # Fetch wildlife sightings data from the database
+    sightings = WildlifeSighting.query.all()
 
+    # Render the wildlife_sightings.html template and pass the sightings data to it
+    return render_template('wildlife_sightings.html', sightings=sightings)
 # Route for displaying nearby conservation areas
 @app.route('/conservation_areas')
 def conservation_areas():
@@ -405,9 +417,23 @@ def notifications():
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
-# Route for the contact us page
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    if request.method == 'POST':
+        # Get form data
+        name = request.form.get('name')
+        email = request.form.get('email')
+        subject = request.form.get('subject')
+        message_body = request.form.get('message')
+
+        # Create and send email
+        msg = Message(subject=f"New message from {name} via Contact Form", sender=email, recipients=['bikorimanadesire@yahoo.com'])
+        msg.body = f"Name: {name}\nEmail: {email}\nMessage: {message_body}"
+        mail.send(msg)
+
+        flash('Your message has been sent successfully!', 'success')
+        return redirect(url_for('contact'))
+
     return render_template('contact.html')
 
 if __name__ == '__main__':
