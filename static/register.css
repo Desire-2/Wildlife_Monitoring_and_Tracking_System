@@ -1,0 +1,28 @@
+.registration-form {
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.registration-form .form-label {
+    font-weight: bold;
+}
+
+.registration-form .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+.registration-form button {
+    margin-top: 20px;
+}
+
+.registration-form a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.registration-form a:hover {
+    text-decoration: underline;
+}

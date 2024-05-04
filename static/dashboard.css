@@ -1,0 +1,70 @@
+.dashboard-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.sighting-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sighting-item:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add-sighting {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add-sighting:hover {
+    background-color: #218838;
+}
+
+.btn-edit, .btn-delete {
+    margin-left: 10px;
+}
+
+.btn-edit:hover, .btn-delete:hover {
+    opacity: 0.8;
+}
+
+/* Custom styles for additional details */
+.details-label {
+    font-weight: bold;
+}
+
+.details-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.details-list li {
+    margin-bottom: 5px;
+}
+
+.details-list li img {
+    max-width: 100px;
+    max-height: 100px;
+    margin-right: 10px;
+}
+
+.details-list li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.details-list li a:hover {
+    text-decoration: underline;
+}

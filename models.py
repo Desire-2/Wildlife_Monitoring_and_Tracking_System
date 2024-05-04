@@ -100,8 +100,8 @@ class Location(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
-    latitude = db.Column(db.Float, nullable=True)  # Update nullable parameter to True
-    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
 
 # Species model
 class Species(db.Model):
@@ -143,9 +143,8 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
     path = db.Column(db.String(255), nullable=False)
-    data = db.Column(LargeBinary, nullable=False)
-    species_id = db.Column(db.Integer, db.ForeignKey('species.id'), nullable=False)
-    species = db.relationship('Species', back_populates='images')
+    wildlife_sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
+    wildlife_sighting = db.relationship('WildlifeSighting', backref=db.backref('images', lazy=True))
 
 # Video model
 class Video(db.Model):
@@ -153,15 +152,11 @@ class Video(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
-    path = db.Column(db.String(255), nullable=True)
-    data = db.Column(LargeBinary, nullable=False)
-    species_id = db.Column(db.Integer, db.ForeignKey('species.id'), nullable=False)
-    species = db.relationship('Species', back_populates='videos')
+    path = db.Column(db.String(255), nullable=False)
+    wildlife_sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
+    wildlife_sighting = db.relationship('WildlifeSighting', backref=db.backref('videos', lazy=True))
 
-# GPSData model
 class GPSData(db.Model):
-    __tablename__ = 'gps_data'
-
     id = db.Column(db.Integer, primary_key=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)

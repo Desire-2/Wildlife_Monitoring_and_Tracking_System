@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">User Dashboard</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8 dashboard-container">
+            <h3>Your Wildlife Sightings</h3>
+            <a href="{{ url_for('add_sighting') }}" class="btn btn-add-sighting mb-3">Add Sighting</a>
+            {% if sightings %}
+                <ul class="list-group">
+                    {% for sighting in sightings %}
+                        <li class="list-group-item sighting-item">
+                            <div>
+                                <span class="details-label">Species:</span> {{ sighting.species.name }}<br>
+                                <span class="details-label">Date:</span> {{ sighting.date }}<br>
+                                <span class="details-label">Location:</span> {{ sighting.location.name }}<br>
+                            </div>
+                            <div>
+                                <span class="details-label">Habitat:</span> {{ sighting.species.habitat.name }}<br>
+                                <span class="details-label">Observation Notes:</span> {{ sighting.observation.notes }}<br>
+                            </div>
+                            {% if sighting.images %}
+                                <div>
+                                    <span class="details-label">Images:</span><br>
+                                    <ul class="details-list">
+                                        {% for image in sighting.images %}
+                                            <li><img src="{{ image.path }}" alt="{{ image.filename }}"></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            {% if sighting.videos %}
+                                <div>
+                                    <span class="details-label">Videos:</span><br>
+                                    <ul class="details-list">
+                                        {% for video in sighting.videos %}
+                                            <li><a href="{{ video.path }}">{{ video.filename }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            <a href="{{ url_for('edit_sighting', sighting_id=sighting.id) }}" class="btn btn-primary btn-sm btn-edit">Edit</a>
+                            <a href="{{ url_for('delete_sighting', sighting_id=sighting.id) }}" class="btn btn-danger btn-sm btn-delete">Delete</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No wildlife sightings found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
