@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-vrl43oaKXlb7MTSD3zdOq1fDuhDPR/3o9NZ4VmZ6VRx7OwwpI1yFzQK51sRaIghu6W6BlSXLRBcUs9mvSXPV5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Custom styling for navigation bar */
-        .navbar {
+       .navbar {
             background: linear-gradient(90deg, #2980b9, #3498db); /* Gradient background */
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow effect */
             padding: 10px 0; /* Padding */
@@ -190,6 +190,44 @@
     {% endblock %}
 </div>
 
+ <footer class="footer bg-dark text-white mt-auto">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <p>123 Main Street, City, Country</p>
+                    <p>Phone: +1 (123) 456-7890</p>
+                    <p>Email: info@example.com</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <!-- Add your social media icons here -->
+                    <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Wildlife Species</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+             <div class="chat-whatsapp">
+        <a href="https://api.whatsapp.com/send?phone=123456789" target="_blank" class="btn btn-primary">
+            <i class="fab fa-whatsapp"></i> Chat with Us on WhatsApp
+        </a>
+    </div>
+
+        </div>
+        <div class="container text-center">
+            <p>&copy; 2024 Wildlife Monitoring and Tracking System. All rights reserved.</p>
+        </div>
+    </footer>
+    
 <!-- Include Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
