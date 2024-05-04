@@ -19,8 +19,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '3398c019976ffdefa09991e7255d60aa'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wildlife.db'
 
+from models import db, User, UserProfile, WildlifeSighting, Image, Video
+
 # Initialize SQLAlchemy for database operations
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 socketio = SocketIO(app)
 mail = Mail(app)
@@ -34,40 +36,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-from models import User, UserProfile
+
 from models import GPSData
 import requests
 import gmaps
-
-
-# Define User model
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-
-# Define WildlifeSighting model
-class WildlifeSighting(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    species = db.Column(db.String(100), nullable=False)
-    location = db.Column(db.String(100), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('sightings', lazy=True))
-    images = db.relationship('Image', backref='sighting', lazy=True)
-    videos = db.relationship('Video', backref='sighting', lazy=True)
-
-# Define Image model
-class Image(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(100), nullable=False)
-    sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
-
-# Define Video model
-class Video(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(100), nullable=False)
-    sighting_id = db.Column(db.Integer, db.ForeignKey('wildlife_sighting.id'), nullable=False)
 
 # Initialize Flask-Login for user authentication
 login_manager = LoginManager()
@@ -152,16 +124,6 @@ def save_profile_image(form_profile_image):
 
     form_profile_image.save(profile_image_path)
     return profile_image_fn
-
-class GPSData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default =datetime.utcnow)
-    animal_id = db.Column(db.Integer)
-
-    def __repr__(self):
-        return f'<GPSData {self.id}>'
 
 @app.route('/realtime')
 def realtime():
